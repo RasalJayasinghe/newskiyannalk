@@ -1,0 +1,13 @@
+Flask==3.0.3
+flask-cors>=4.0.0
+torch>=2.0.0
+TTS==0.21.1
+numpy
+soundfile
+pydub
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+lxml>=4.9.0
+gunicorn>=21.2.0
+redis>=5.0.0
+
