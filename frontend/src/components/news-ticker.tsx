@@ -18,7 +18,7 @@ export function NewsTicker({ breakingNews }: NewsTickerProps) {
       <div className="flex items-center gap-4 py-2">
         <div className="flex items-center gap-2 text-destructive font-semibold whitespace-nowrap">
           <AlertCircle className="h-4 w-4 animate-pulse" />
-          <span>Breaking News</span>
+          <span>විශේෂ පුවත්</span>
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="animate-scroll flex gap-8">

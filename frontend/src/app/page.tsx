@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 type TimeFilter = "all" | "hour" | "today" | "yesterday";
 type CategoryFilter = "all" | string;
 
-const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const POLL_INTERVAL = 60 * 60 * 1000; // 1 hour (60 minutes)
 
 export default function Home() {
   const [newsItems, setNewsItems] = React.useState<NewsItem[]>([]);
@@ -165,6 +165,7 @@ export default function Home() {
       const response = await fetchNews();
       if (response.success) {
         setNewsItems(response.items);
+        setLastUpdateTime(new Date()); // Update timestamp
         
         // Auto-play top 5 if consent given and first load
         if (!silent && autoplayConsent === true && queue.length === 0) {
