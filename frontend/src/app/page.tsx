@@ -29,6 +29,7 @@ export default function Home() {
   const [isHealthCheckLoading, setIsHealthCheckLoading] = React.useState(true);
   const [autoplayConsent, setAutoplayConsent] = React.useState<boolean | null>(null);
   const [isGenerating, setIsGenerating] = React.useState<Set<number>>(new Set());
+  const [lastUpdateTime, setLastUpdateTime] = React.useState<Date | null>(null);
 
   // Filters
   const [categoryFilter, setCategoryFilter] = React.useState<CategoryFilter>("all");
