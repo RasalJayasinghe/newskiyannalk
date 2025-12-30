@@ -399,10 +399,15 @@ export default function Home() {
               <div>
                 <CardTitle>News Headlines</CardTitle>
                 <CardDescription>
-                  {filteredNews.length} {filteredNews.length === 1 ? "item" : "items"} found
+                  {filteredNews.length} {filteredNews.length === 1 ? "අයිතමයක්" : "අයිතම"} හමු විය
                   {listenLaterItems.length > 0 && (
                     <span className="ml-2">
-                      • <Clock className="inline h-3 w-3" /> {listenLaterItems.length} saved
+                      • <Clock className="inline h-3 w-3" /> {listenLaterItems.length} සුරක්ෂිත
+                    </span>
+                  )}
+                  {lastUpdateTime && (
+                    <span className="ml-2 text-xs">
+                      • අවසන් යාවත්කාලීනය: {lastUpdateTime.toLocaleTimeString('si-LK', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   )}
                 </CardDescription>
