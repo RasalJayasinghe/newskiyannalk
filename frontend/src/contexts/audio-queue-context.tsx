@@ -15,6 +15,7 @@ interface AudioQueueContextType {
   playbackSpeed: number;
   currentTime: number;
   duration: number;
+  volume: number;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   addToQueue: (item: NewsItem) => void;
   removeFromQueue: (index: number) => void;
@@ -22,6 +23,7 @@ interface AudioQueueContextType {
   setCurrentIndex: (index: number) => void;
   setIsPlaying: (playing: boolean) => void;
   setPlaybackSpeed: (speed: number) => void;
+  setVolume: (volume: number) => void;
   updateQueueItem: (index: number, updates: Partial<QueueItem>) => void;
   playAudio: (url: string) => void;
 }
@@ -35,6 +37,7 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
   const [playbackSpeed, setPlaybackSpeed] = React.useState(1);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
+  const [volume, setVolume] = React.useState(1);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   const addToQueue = React.useCallback((item: NewsItem) => {
@@ -80,6 +83,7 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
 
     const audio = new Audio(url);
     audio.playbackRate = playbackSpeed;
+    audio.volume = volume;
     audioRef.current = audio;
 
     const handlePlay = () => setIsPlaying(true);
@@ -116,6 +120,13 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
     }
   }, [isPlaying]);
 
+  // Update audio volume when it changes
+  React.useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
   const value = React.useMemo(
     () => ({
       queue,
@@ -124,6 +135,7 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       playbackSpeed,
       currentTime,
       duration,
+      volume,
       audioRef,
       addToQueue,
       removeFromQueue,
@@ -131,6 +143,7 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       setCurrentIndex,
       setIsPlaying,
       setPlaybackSpeed,
+      setVolume,
       updateQueueItem,
       playAudio,
     }),
@@ -141,10 +154,12 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       playbackSpeed,
       currentTime,
       duration,
+      volume,
       addToQueue,
       removeFromQueue,
       clearQueue,
       setPlaybackSpeed,
+      setVolume,
       updateQueueItem,
       playAudio,
     ]

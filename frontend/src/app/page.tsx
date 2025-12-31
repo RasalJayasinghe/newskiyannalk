@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NewsCard } from "@/components/news-card";
 import { AudioQueuePlayer } from "@/components/audio-queue-player";
+import { BottomAudioPlayer } from "@/components/bottom-audio-player";
 import { NewsTicker } from "@/components/news-ticker";
 import { ThemeControls } from "@/components/theme-controls";
 import { Loader2, AlertCircle, RefreshCw, Play, Clock, Search, ArrowUp } from "lucide-react";
@@ -46,6 +47,7 @@ export default function Home() {
     playbackSpeed,
     currentTime,
     duration,
+    volume,
     audioRef,
     addToQueue,
     removeFromQueue,
@@ -53,6 +55,7 @@ export default function Home() {
     setCurrentIndex,
     setIsPlaying,
     setPlaybackSpeed,
+    setVolume,
     updateQueueItem,
     playAudio: contextPlayAudio,
   } = useAudioQueue();
@@ -468,34 +471,36 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* Audio Queue Player */}
-        <AudioQueuePlayer
-          queue={queue}
-          currentIndex={currentIndex}
-          isPlaying={isPlaying}
-          playbackSpeed={playbackSpeed}
-          currentTime={currentTime}
-          duration={duration}
-          onPlay={handlePlay}
-          onPause={() => {
-            setIsPlaying(false);
-            audioRef.current?.pause();
-          }}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onSpeedChange={setPlaybackSpeed}
-          onRemove={removeFromQueue}
-          onClear={clearQueue}
-          onJumpTo={(index) => {
-            setCurrentIndex(index);
-            const item = queue[index];
-            if (item?.audioUrl) {
-              contextPlayAudio(item.audioUrl);
-            } else if (item) {
-              generateAudioForItem(item, index);
-            }
-          }}
-        />
+        {/* Audio Queue Player - Desktop/Tablet View */}
+        <div className="hidden md:block">
+          <AudioQueuePlayer
+            queue={queue}
+            currentIndex={currentIndex}
+            isPlaying={isPlaying}
+            playbackSpeed={playbackSpeed}
+            currentTime={currentTime}
+            duration={duration}
+            onPlay={handlePlay}
+            onPause={() => {
+              setIsPlaying(false);
+              audioRef.current?.pause();
+            }}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onSpeedChange={setPlaybackSpeed}
+            onRemove={removeFromQueue}
+            onClear={clearQueue}
+            onJumpTo={(index) => {
+              setCurrentIndex(index);
+              const item = queue[index];
+              if (item?.audioUrl) {
+                contextPlayAudio(item.audioUrl);
+              } else if (item) {
+                generateAudioForItem(item, index);
+              }
+            }}
+          />
+        </div>
 
         {/* Controls */}
         <Card>
@@ -681,7 +686,7 @@ export default function Home() {
       {/* Scroll to Top Button */}
       {scrollProgress > 10 && (
         <Button
-          className="fixed bottom-8 right-8 rounded-full h-12 w-12 shadow-lg z-50"
+          className="fixed bottom-24 sm:bottom-28 right-4 sm:right-8 rounded-full h-12 w-12 shadow-lg z-40"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           size="icon"
           aria-label="Scroll to top"
@@ -689,6 +694,37 @@ export default function Home() {
           <ArrowUp className="h-5 w-5" />
         </Button>
       )}
+
+      {/* Bottom Audio Player Bar */}
+      <BottomAudioPlayer
+        queue={queue}
+        currentIndex={currentIndex}
+        isPlaying={isPlaying}
+        playbackSpeed={playbackSpeed}
+        currentTime={currentTime}
+        duration={duration}
+        volume={volume}
+        onPlay={handlePlay}
+        onPause={() => {
+          setIsPlaying(false);
+          audioRef.current?.pause();
+        }}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        onSpeedChange={setPlaybackSpeed}
+        onVolumeChange={setVolume}
+        onClear={clearQueue}
+        onJumpTo={(index) => {
+          setCurrentIndex(index);
+          const item = queue[index];
+          if (item?.audioUrl) {
+            contextPlayAudio(item.audioUrl);
+          } else if (item) {
+            generateAudioForItem(item, index);
+          }
+        }}
+        audioRef={audioRef}
+      />
     </div>
   );
 }
