@@ -108,25 +108,13 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       });
   }, [playbackSpeed]);
 
-  // Update time when audio is playing
+  // Reset time when audio stops
   React.useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !isPlaying) {
+    if (!isPlaying && audioRef.current === null) {
       setCurrentTime(0);
-      return;
+      setDuration(0);
     }
-
-    const interval = setInterval(() => {
-      if (audioRef.current) {
-        setCurrentTime(audioRef.current.currentTime);
-        if (audioRef.current.duration && audioRef.current.duration !== duration) {
-          setDuration(audioRef.current.duration);
-        }
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isPlaying, duration]);
+  }, [isPlaying]);
 
   const value = React.useMemo(
     () => ({

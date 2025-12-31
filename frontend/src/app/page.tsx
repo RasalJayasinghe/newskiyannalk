@@ -345,19 +345,62 @@ export default function Home() {
       {/* News Ticker */}
       <NewsTicker breakingNews={breakingNews} />
 
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Header with Theme Controls */}
-        <div className="flex items-center justify-between">
-          <div className="text-center sm:text-left space-y-2 flex-1">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Sinhala News Reader
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Listen to latest Sinhala news headlines
-            </p>
-          </div>
-          <ThemeControls />
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-red-900 via-gray-900 to-black py-12 sm:py-16 lg:py-20">
+        {/* Animated Wave Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path
+              d="M0,60 C300,100 600,20 900,60 C1050,80 1150,40 1200,60 L1200,120 L0,120 Z"
+              className="fill-white animate-wave"
+              style={{
+                animation: 'wave 8s ease-in-out infinite',
+              }}
+            />
+            <path
+              d="M0,80 C300,120 600,40 900,80 C1050,100 1150,60 1200,80 L1200,120 L0,120 Z"
+              className="fill-white animate-wave-delayed"
+              style={{
+                animation: 'wave 10s ease-in-out infinite',
+                animationDelay: '1s',
+              }}
+            />
+          </svg>
         </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="text-center sm:text-left space-y-4 flex-1 animate-fade-in">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-red-100 to-red-400 animate-gradient">
+                සිංහල පුවත් කියවන්නා
+              </h1>
+              <p className="text-gray-300 text-lg sm:text-xl mt-3">
+                Listen to latest Sinhala news headlines
+              </p>
+              <div className="flex flex-wrap gap-3 mt-6 justify-center sm:justify-start">
+                <div className="px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all animate-slide-in-left">
+                  <span className="text-sm text-white flex items-center gap-2">
+                    <span className="text-lg">🎙️</span>
+                    <span>AI-Powered Voice</span>
+                  </span>
+                </div>
+                <div className="px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all animate-slide-in-right">
+                  <span className="text-sm text-white flex items-center gap-2">
+                    <span className="text-lg">⚡</span>
+                    <span>Real-time Updates</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="animate-fade-in-delayed">
+              <ThemeControls />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
         {/* Autoplay Consent */}
         {autoplayConsent === null && newsItems.length > 0 && (
