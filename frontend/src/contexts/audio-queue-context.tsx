@@ -13,6 +13,8 @@ interface AudioQueueContextType {
   currentIndex: number;
   isPlaying: boolean;
   playbackSpeed: number;
+  currentTime: number;
+  duration: number;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   addToQueue: (item: NewsItem) => void;
   removeFromQueue: (index: number) => void;
@@ -31,6 +33,8 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [playbackSpeed, setPlaybackSpeed] = React.useState(1);
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [duration, setDuration] = React.useState(0);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   const addToQueue = React.useCallback((item: NewsItem) => {
@@ -80,17 +84,49 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
 
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
 
     audio.play()
-      .then(() => setIsPlaying(true))
+      .then(() => {
+        setIsPlaying(true);
+        setDuration(audio.duration);
+      })
       .catch((err) => {
         console.error("Playback error:", err);
         setIsPlaying(false);
       });
   }, [playbackSpeed]);
+
+  // Update time when audio is playing
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !isPlaying) {
+      setCurrentTime(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (audioRef.current) {
+        setCurrentTime(audioRef.current.currentTime);
+        if (audioRef.current.duration && audioRef.current.duration !== duration) {
+          setDuration(audioRef.current.duration);
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, duration]);
 
   const value = React.useMemo(
     () => ({
@@ -98,6 +134,8 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       currentIndex,
       isPlaying,
       playbackSpeed,
+      currentTime,
+      duration,
       audioRef,
       addToQueue,
       removeFromQueue,
@@ -113,6 +151,8 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
       currentIndex,
       isPlaying,
       playbackSpeed,
+      currentTime,
+      duration,
       addToQueue,
       removeFromQueue,
       clearQueue,

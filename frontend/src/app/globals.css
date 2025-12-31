@@ -187,3 +187,15 @@
 .large-text .text-xs {
   font-size: 0.875rem;
 }
+
+/* Typography improvements */
+@layer base {
+  h1, h2, h3 {
+    @apply tracking-tight;
+  }
+  
+  .news-title {
+    @apply font-semibold text-lg leading-relaxed;
+    line-height: 1.6;
+  }
+}

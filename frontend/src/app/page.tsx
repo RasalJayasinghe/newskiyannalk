@@ -8,7 +8,8 @@ import { NewsCard } from "@/components/news-card";
 import { AudioQueuePlayer } from "@/components/audio-queue-player";
 import { NewsTicker } from "@/components/news-ticker";
 import { ThemeControls } from "@/components/theme-controls";
-import { Loader2, AlertCircle, RefreshCw, Play, Clock } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw, Play, Clock, Search, ArrowUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { fetchNews, synthesizeText, checkHealth, NewsItem } from "@/lib/api";
 import { useAudioQueue } from "@/contexts/audio-queue-context";
 import { useListenLater } from "@/hooks/use-listen-later";
@@ -30,6 +31,8 @@ export default function Home() {
   const [autoplayConsent, setAutoplayConsent] = React.useState<boolean | null>(null);
   const [isGenerating, setIsGenerating] = React.useState<Set<number>>(new Set());
   const [lastUpdateTime, setLastUpdateTime] = React.useState<Date | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [scrollProgress, setScrollProgress] = React.useState(0);
 
   // Filters
   const [categoryFilter, setCategoryFilter] = React.useState<CategoryFilter>("all");
@@ -41,6 +44,8 @@ export default function Home() {
     currentIndex,
     isPlaying,
     playbackSpeed,
+    currentTime,
+    duration,
     audioRef,
     addToQueue,
     removeFromQueue,
@@ -118,9 +123,31 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [isHealthy]);
 
-  // Filter news based on category and time
+  // Scroll progress tracking
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const progress = documentHeight > windowHeight 
+        ? (scrollTop / (documentHeight - windowHeight)) * 100 
+        : 0;
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Filter news based on category, time, and search
   React.useEffect(() => {
     let filtered = [...newsItems];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((item) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
     // Category filter
     if (categoryFilter !== "all") {
@@ -142,7 +169,7 @@ export default function Home() {
     }
 
     setFilteredNews(filtered);
-  }, [newsItems, categoryFilter, timeFilter]);
+  }, [newsItems, categoryFilter, timeFilter, searchQuery]);
 
   // Audio playback control
   React.useEffect(() => {
@@ -307,6 +334,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+      {/* Reading Progress Indicator */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
+        <div 
+          className="h-full bg-primary transition-all duration-150"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       {/* News Ticker */}
       <NewsTicker breakingNews={breakingNews} />
 
@@ -366,12 +401,38 @@ export default function Home() {
           </Alert>
         )}
 
+        {/* Stats Dashboard */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">{newsItems.length}</div>
+                <div className="text-xs text-muted-foreground">Total News</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-destructive">{breakingNews.length}</div>
+                <div className="text-xs text-muted-foreground">Breaking</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">{queue.length}</div>
+                <div className="text-xs text-muted-foreground">In Queue</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{listenLaterItems.length}</div>
+                <div className="text-xs text-muted-foreground">Saved</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Audio Queue Player */}
         <AudioQueuePlayer
           queue={queue}
           currentIndex={currentIndex}
           isPlaying={isPlaying}
           playbackSpeed={playbackSpeed}
+          currentTime={currentTime}
+          duration={duration}
           onPlay={handlePlay}
           onPause={() => {
             setIsPlaying(false);
@@ -433,6 +494,17 @@ export default function Home() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search news headlines..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
             {/* Category Filters */}
             <div className="flex flex-wrap gap-2">
               <Button
@@ -495,12 +567,39 @@ export default function Home() {
 
             {/* News Grid - 3 columns desktop, 1 mobile */}
             {isLoadingNews ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                      <div className="h-4 bg-muted rounded w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-3 bg-muted rounded w-1/4 mb-2" />
+                      <div className="h-3 bg-muted rounded w-1/3" />
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             ) : filteredNews.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No news items found. Try adjusting filters or refresh.
+              <div className="text-center py-16 space-y-4">
+                <div className="text-6xl">📰</div>
+                <h3 className="text-xl font-semibold">No news found</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {searchQuery.trim() 
+                    ? "Try adjusting your search query or filters."
+                    : "Try adjusting your filters or refresh to get the latest headlines."}
+                </p>
+                <Button 
+                  onClick={() => { 
+                    setCategoryFilter("all"); 
+                    setTimeFilter("all");
+                    setSearchQuery("");
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -516,6 +615,7 @@ export default function Home() {
                         isPlaying={isCurrent && isPlaying}
                         isQueued={isInQueue && !isCurrent}
                         isInListenLater={isInListenLater(item.id)}
+                        isGenerating={isGenerating.has(item.id)}
                         onClick={() => handlePlayItem(item)}
                         onPlay={() => handlePlayItem(item)}
                         onListenLater={() => {
@@ -534,6 +634,18 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Scroll to Top Button */}
+      {scrollProgress > 10 && (
+        <Button
+          className="fixed bottom-8 right-8 rounded-full h-12 w-12 shadow-lg z-50"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          size="icon"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   );
 }

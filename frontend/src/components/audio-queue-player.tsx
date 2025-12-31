@@ -24,6 +24,8 @@ interface AudioQueuePlayerProps {
   currentIndex: number;
   isPlaying: boolean;
   playbackSpeed: number;
+  currentTime: number;
+  duration: number;
   onPlay: () => void;
   onPause: () => void;
   onNext: () => void;
@@ -34,11 +36,20 @@ interface AudioQueuePlayerProps {
   onJumpTo?: (index: number) => void;
 }
 
+function formatTime(seconds: number): string {
+  if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
 export function AudioQueuePlayer({
   queue,
   currentIndex,
   isPlaying,
   playbackSpeed,
+  currentTime,
+  duration,
   onPlay,
   onPause,
   onNext,
@@ -146,6 +157,22 @@ export function AudioQueuePlayer({
               </Button>
             )}
           </div>
+
+          {/* Progress Bar */}
+          {duration > 0 && (
+            <div className="space-y-1">
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+          )}
 
           {/* Queue List (Collapsible) */}
           {queue.length > 1 && (
