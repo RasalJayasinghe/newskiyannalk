@@ -1,7 +1,7 @@
 Flask==3.0.3
 flask-cors>=4.0.0
 torch>=2.0.0
-TTS==0.21.1
+TTS==0.20.0
 numpy
 soundfile
 pydub
