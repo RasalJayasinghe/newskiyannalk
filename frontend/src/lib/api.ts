@@ -1,8 +1,10 @@
 /**
  * API utility functions for Sinhala TTS service
+ * Uses Vercel serverless function (which falls back to Render backend)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Backend URL for health checks and news fetching (always uses Render backend)
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export interface HealthResponse {
   status: string;
@@ -38,9 +40,11 @@ export interface NewsResponse {
 
 /**
  * Check API health status
+ * Always uses Render backend (health check not available via Hugging Face API)
  */
 export async function checkHealth(): Promise<HealthResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/health`);
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const response = await fetch(`${backendUrl}/api/health`);
   
   if (!response.ok) {
     throw new Error('Health check failed');
@@ -51,9 +55,17 @@ export async function checkHealth(): Promise<HealthResponse> {
 
 /**
  * Synthesize Sinhala text to speech
+ * Uses Vercel serverless function in production (which tries Hugging Face API first, then Render backend)
+ * Uses Render backend directly in development
  */
 export async function synthesizeText(text: string): Promise<Blob> {
-  const response = await fetch(`${API_BASE_URL}/api/synthesize`, {
+  // In production, use Vercel serverless function; in dev, use Render backend
+  const ttsEndpoint = 
+    process.env.NODE_ENV === 'production'
+      ? '/api/tts' // Vercel serverless function
+      : `${API_BASE_URL}/api/synthesize`; // Direct Render backend
+  
+  const response = await fetch(ttsEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -82,9 +94,11 @@ export async function synthesizeText(text: string): Promise<Blob> {
 
 /**
  * Fetch news headlines from Ada Derana
+ * Always uses Render backend (news scraping not available via Hugging Face API)
  */
 export async function fetchNews(): Promise<NewsResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/fetch-news`);
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const response = await fetch(`${backendUrl}/api/fetch-news`);
   
   if (!response.ok) {
     throw new Error('Failed to fetch news');
