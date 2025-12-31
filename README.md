@@ -94,8 +94,7 @@ newsreadermodel/
 │   │   └── lib/           # Utilities and API client
 │   └── package.json       # Node dependencies
 ├── .gitignore             # Git ignore rules
-├── README.md              # This file
-└── DEPLOYMENT.md          # Deployment guide
+└── README.md              # This file
 ```
 
 ## API Endpoints
@@ -147,24 +146,13 @@ Fetch latest news headlines
 }
 ```
 
-## Deployment
+## Environment Variables
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
-
-### Quick Deploy
-
-**Backend (Render):**
-1. Push to GitHub
-2. Connect to Render
-3. Set root directory: `SinhalaVITS-TTS-F1`
-4. Build command: `pip install -r requirements.txt && bash download_model.sh`
-5. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2`
-
-**Frontend (Vercel):**
-1. Connect GitHub repo
-2. Set root directory: `frontend`
-3. Add environment variable: `NEXT_PUBLIC_API_URL`
-4. Deploy!
+### Frontend
+Create `frontend/.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
 ## Development
 

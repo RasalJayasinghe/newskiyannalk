@@ -35,12 +35,7 @@ A modern, responsive Next.js frontend for the SinhalaVITS-TTS-F1 Text-to-Speech 
 npm install
 ```
 
-2. Create environment file:
-```bash
-cp .env.example .env.local
-```
-
-Or create `.env.local` manually:
+2. Create `.env.local` file:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
