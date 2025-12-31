@@ -63,7 +63,7 @@ export async function synthesizeText(text: string): Promise<Blob> {
   const ttsEndpoint = 
     process.env.NODE_ENV === 'production'
       ? '/api/tts' // Vercel serverless function
-      : `${API_BASE_URL}/api/synthesize`; // Direct Render backend
+      : `${BACKEND_URL}/api/synthesize`; // Direct Render backend
   
   const response = await fetch(ttsEndpoint, {
     method: 'POST',
