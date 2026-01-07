@@ -79,6 +79,12 @@ export default function Home() {
 
   // Check URL for shared news item
   React.useEffect(() => {
+    // #region agent log
+    if (typeof window !== 'undefined') {
+      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:82',message:'URL check effect',data:{hasWindow:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    }
+    // #endregion
+    if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const newsId = params.get("news");
     if (newsId && newsItems.length > 0) {
@@ -99,11 +105,23 @@ export default function Home() {
 
   // Health check on mount
   React.useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:101',message:'Health check effect started',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     const checkApiHealth = async () => {
       try {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:104',message:'Calling checkHealth',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         const health = await checkHealth();
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:106',message:'Health check result',data:{health},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         setIsHealthy(health.model_loaded && health.status === "healthy");
       } catch (err) {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:108',message:'Health check error caught',data:{error:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         setIsHealthy(false);
         console.error("Health check failed:", err);
       } finally {
@@ -128,6 +146,12 @@ export default function Home() {
 
   // Scroll progress tracking
   React.useEffect(() => {
+    // #region agent log
+    if (typeof window !== 'undefined') {
+      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:130',message:'Scroll tracking effect',data:{hasWindow:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    }
+    // #endregion
+    if (typeof window === 'undefined') return;
     const handleScroll = () => {
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
@@ -190,10 +214,19 @@ export default function Home() {
   }, [playbackSpeed, queue, currentIndex]);
 
   const loadNews = async (silent = false) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:192',message:'loadNews called',data:{silent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     if (!silent) setIsLoadingNews(true);
     setError(null);
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:196',message:'Calling fetchNews',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       const response = await fetchNews();
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:198',message:'fetchNews response',data:{success:response.success,count:response.count},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       if (response.success) {
         setNewsItems(response.items);
         setLastUpdateTime(new Date()); // Update timestamp
@@ -207,6 +240,9 @@ export default function Home() {
         setError(response.error || "Failed to fetch news");
       }
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:209',message:'loadNews error',data:{error:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       setError(err instanceof Error ? err.message : "Failed to fetch news");
       console.error("Error loading news:", err);
     } finally {
