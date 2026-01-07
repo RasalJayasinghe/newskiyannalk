@@ -156,25 +156,31 @@ def load_model():
     keep_warm=1,  # Keep 1 container warm to reduce cold starts
 )
 @modal.web_endpoint(method="POST", label="synthesize")
-def synthesize(request: dict):
+def synthesize(request: modal.web.Request):
     """
     Synthesize Sinhala text to speech.
     
     Args:
-        request: Request dict with 'text' field, or direct text string
+        request: Modal web request object
         
     Returns:
         Audio file as bytes
     """
     try:
-        # Handle both JSON body and direct text parameter
-        if isinstance(request, dict):
-            text = request.get("text", "")
-        else:
-            text = str(request)
+        # Parse JSON body
+        try:
+            body = request.json()
+            text = body.get("text", "")
+        except:
+            # Fallback to form data or query params
+            text = request.form.get("text", "") or request.args.get("text", "")
         
         if not text:
-            return {"error": "Text parameter is required"}, 400
+            return modal.web.Response(
+                body='{"error": "Text parameter is required"}',
+                headers={"Content-Type": "application/json"},
+                status_code=400,
+            )
         
         # Validate input
         is_valid, error_msg = validate_sinhala_text(text)
