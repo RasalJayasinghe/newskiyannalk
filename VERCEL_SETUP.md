@@ -1,28 +1,29 @@
 # Vercel Deployment Setup
 
-## Important: Root Directory Configuration
+## ⚠️ CRITICAL: Root Directory Configuration
 
-Since the Next.js app is in the `frontend/` subdirectory, you **must** configure Vercel to use `frontend` as the root directory.
+**You MUST set the Root Directory to `frontend` in Vercel dashboard for the deployment to work.**
 
-### Steps:
+### Step-by-Step Instructions:
 
-1. Go to your Vercel project dashboard
-2. Navigate to **Settings** → **General**
-3. Under **Root Directory**, click **Edit**
-4. Set the root directory to: `frontend`
-5. Save changes
+1. Go to your Vercel project dashboard: https://vercel.com/dashboard
+2. Select your project: `newskiyannalk`
+3. Click on **Settings** tab
+4. Scroll down to **General** section
+5. Find **Root Directory** setting
+6. Click **Edit** button
+7. Select **Other** and enter: `frontend`
+8. Click **Save**
 
-Vercel will then:
-- Auto-detect Next.js framework
-- Use the correct build settings
-- Deploy from the `frontend` directory
+**After saving, Vercel will:**
+- ✅ Auto-detect Next.js framework from `frontend/package.json`
+- ✅ Use the correct build settings automatically
+- ✅ Deploy from the `frontend` directory
+- ✅ No need for custom vercel.json configuration
 
-### Alternative: If you can't set root directory
+### Why This Is Required
 
-If you need to deploy from the repository root, the `vercel.json` file is configured, but you still need to ensure:
-- Build command: `cd frontend && npm install && npm run build`
-- Output directory: `frontend/.next`
-- Framework: `nextjs`
+Vercel needs to find `package.json` with `next` in dependencies to detect Next.js. Since your `package.json` is in the `frontend/` folder, Vercel must be configured to use that as the root directory.
 
 ## Environment Variables
 
