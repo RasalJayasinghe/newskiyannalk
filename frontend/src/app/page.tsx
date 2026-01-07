@@ -386,7 +386,7 @@ export default function Home() {
             <div className="text-center sm:text-left space-y-4 flex-1 animate-fade-in">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-red-100 to-red-400 animate-gradient">
                 සිංහල පුවත් කියවන්නා
-              </h1>
+          </h1>
               <p className="text-gray-300 text-lg sm:text-xl mt-3">
                 Listen to latest Sinhala news headlines
               </p>
