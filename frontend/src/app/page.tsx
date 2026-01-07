@@ -98,8 +98,10 @@ export default function Home() {
     }
   }, [newsItems]);
 
-  // Health check on mount
+  // Health check on mount (only on client)
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkApiHealth = async () => {
       try {
         const health = await checkHealth();

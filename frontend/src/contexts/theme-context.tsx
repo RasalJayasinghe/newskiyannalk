@@ -30,35 +30,50 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Load from localStorage on mount
   React.useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const savedAccessibility = localStorage.getItem("accessibility");
+    if (typeof window === 'undefined') return;
     
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    }
-    
-    if (savedAccessibility) {
-      try {
-        setAccessibilityState(JSON.parse(savedAccessibility));
-      } catch (e) {
-        // Ignore parse errors
+    try {
+      const savedTheme = localStorage.getItem("theme") as Theme | null;
+      const savedAccessibility = localStorage.getItem("accessibility");
+      
+      if (savedTheme) {
+        setThemeState(savedTheme);
       }
+      
+      if (savedAccessibility) {
+        try {
+          setAccessibilityState(JSON.parse(savedAccessibility));
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+    } catch (e) {
+      // localStorage not available (SSR)
     }
   }, []);
 
   // Apply theme
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const root = document.documentElement;
     if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
-    localStorage.setItem("theme", theme);
+    
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (e) {
+      // localStorage not available
+    }
   }, [theme]);
 
   // Apply accessibility settings
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const root = document.documentElement;
     if (accessibility.enabled) {
       if (accessibility.highContrast) {
@@ -74,7 +89,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("high-contrast", "large-text");
     }
-    localStorage.setItem("accessibility", JSON.stringify(accessibility));
+    
+    try {
+      localStorage.setItem("accessibility", JSON.stringify(accessibility));
+    } catch (e) {
+      // localStorage not available
+    }
   }, [accessibility]);
 
   const setTheme = React.useCallback((newTheme: Theme) => {

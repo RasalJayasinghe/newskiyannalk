@@ -10,22 +10,26 @@ export function useListenLater() {
 
   // Load from localStorage on mount
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setItems(JSON.parse(stored));
       }
     } catch (e) {
-      console.error("Error loading listen later queue:", e);
+      // localStorage not available or parse error (SSR safe)
     }
   }, []);
 
   // Save to localStorage whenever items change
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
-      console.error("Error saving listen later queue:", e);
+      // localStorage not available (SSR safe)
     }
   }, [items]);
 

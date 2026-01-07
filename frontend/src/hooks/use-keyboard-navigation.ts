@@ -4,6 +4,8 @@ import * as React from "react";
 
 export function useKeyboardNavigation() {
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input/textarea
       if (
