@@ -84,7 +84,7 @@ newsreadermodel/
 │   ├── romanizer.py        # Sinhala to Roman conversion
 │   ├── requirements.txt    # Python dependencies
 │   ├── download_model.sh  # Model download script
-│   └── render.yaml         # Render deployment config
+│   └── modal_app.py       # Modal deployment config
 ├── frontend/                # Next.js frontend
 │   ├── src/
 │   │   ├── app/           # Next.js app router
