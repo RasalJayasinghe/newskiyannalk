@@ -1,8 +1,5 @@
 "use client";
 
-// Force dynamic rendering to avoid static generation issues
-export const dynamic = 'force-dynamic';
-
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
