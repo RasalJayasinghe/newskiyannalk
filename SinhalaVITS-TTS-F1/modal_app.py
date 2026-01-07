@@ -186,8 +186,6 @@ def synthesize(text: str):
         
         # Romanize Sinhala text
         try:
-            import sys
-            sys.path.insert(0, "/root")
             from romanizer import sinhala_to_roman
             romanized = sinhala_to_roman(text)
             logger.info(f"Romanized text: {romanized[:50]}...")
@@ -248,8 +246,6 @@ def health():
 def fetch_news():
     """Fetch news from Ada Derana."""
     try:
-        import sys
-        sys.path.insert(0, "/root")
         from news_scraper import scrape_adaderana
         result = scrape_adaderana()
         return result
