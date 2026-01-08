@@ -7,6 +7,7 @@ import os
 import io
 import re
 import hashlib
+import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -22,6 +23,12 @@ app = modal.App("sinhala-tts")  # Updated: embedded functions to fix import issu
 
 # Create a volume to store the model files (persistent storage)
 model_volume = modal.Volume.from_name("sinhala-tts-models", create_if_missing=True)
+
+# Create a volume to cache news data (persistent storage)
+news_cache_volume = modal.Volume.from_name("sinhala-tts-news-cache", create_if_missing=True)
+
+# News cache file path
+NEWS_CACHE_FILE = "/news_cache/latest_news.json"
 
 # Define the image with all dependencies
 image = (
@@ -437,21 +444,84 @@ def health():
     }
 
 
+def get_cached_news():
+    """Read cached news from volume."""
+    try:
+        if os.path.exists(NEWS_CACHE_FILE):
+            with open(NEWS_CACHE_FILE, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+                # Check if cache is still valid (less than 4 hours old)
+                cache_timestamp = datetime.fromisoformat(cached_data.get('timestamp', datetime.now().isoformat()))
+                age = datetime.now() - cache_timestamp
+                if age < timedelta(hours=4):
+                    logger.info(f"Returning cached news (age: {age})")
+                    return cached_data
+                else:
+                    logger.info(f"Cache expired (age: {age}), will scrape fresh news")
+        return None
+    except Exception as e:
+        logger.warning(f"Error reading cache: {e}")
+        return None
+
+
+def save_news_to_cache(news_data):
+    """Save news data to cache volume."""
+    try:
+        os.makedirs(os.path.dirname(NEWS_CACHE_FILE), exist_ok=True)
+        with open(NEWS_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(news_data, f, ensure_ascii=False, indent=2)
+        # Commit the volume to persist changes
+        news_cache_volume.commit()
+        logger.info(f"News cached successfully: {len(news_data.get('items', []))} items")
+    except Exception as e:
+        logger.error(f"Error saving cache: {e}")
+
+
 @app.function(
     image=image,
-    volumes={"/models": model_volume},
+    volumes={"/models": model_volume, "/news_cache": news_cache_volume},
     timeout=60,
 )
 @modal.fastapi_endpoint(method="GET", label="fetch-news")
 def fetch_news():
-    """Fetch news from Ada Derana."""
+    """Fetch news from cache. Returns cached news if available, otherwise scrapes fresh."""
     try:
-        # scrape_adaderana function is embedded above (no import needed)
+        # Try to get cached news first
+        cached_news = get_cached_news()
+        if cached_news:
+            return cached_news
+        
+        # If no cache or cache expired, scrape fresh (fallback)
+        logger.info("No valid cache found, scraping fresh news...")
         result = scrape_adaderana()
+        if result.get("success"):
+            save_news_to_cache(result)
         return result
     except Exception as e:
         logger.error(f"Error fetching news: {e}")
         return {"success": False, "error": str(e), "items": []}, 500
+
+
+@app.function(
+    image=image,
+    volumes={"/news_cache": news_cache_volume},
+    timeout=120,
+    schedule=modal.Period(hours=3),  # Every 3 hours
+)
+def scheduled_news_scraper():
+    """Scheduled function that runs every 3 hours to scrape and cache news."""
+    try:
+        logger.info("Scheduled news scraping started...")
+        result = scrape_adaderana()
+        if result.get("success"):
+            save_news_to_cache(result)
+            logger.info(f"Scheduled scraping completed: {result.get('count', 0)} items cached")
+        else:
+            logger.error(f"Scheduled scraping failed: {result.get('error', 'Unknown error')}")
+        return result
+    except Exception as e:
+        logger.error(f"Error in scheduled news scraper: {e}")
+        return {"success": False, "error": str(e)}
 
 
 @app.local_entrypoint()
