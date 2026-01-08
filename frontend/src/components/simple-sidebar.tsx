@@ -44,10 +44,11 @@ export function SimpleSidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-64",
+          "fixed lg:static inset-y-0 left-0 z-40 w-64",
           "bg-white dark:bg-black",
           "border-r-2 border-black dark:border-white",
           "transition-transform duration-300 transform lg:translate-x-0",
+          "overflow-y-auto",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

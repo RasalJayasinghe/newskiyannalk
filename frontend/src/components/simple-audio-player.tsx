@@ -63,7 +63,7 @@ export function SimpleAudioPlayer({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black border-t-2 border-black dark:border-white p-4 lg:ml-64 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="hidden lg:flex fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black border-t-2 border-black dark:border-white p-4 lg:ml-64 flex-col md:flex-row items-center justify-between gap-4">
       {/* Left: Current Track Info */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="min-w-0 flex-1">

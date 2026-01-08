@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SimpleNewsCard } from "@/components/simple-news-card";
 import { SimpleAudioPlayer } from "@/components/simple-audio-player";
+import { MiniAudioPlayer } from "@/components/mini-audio-player";
 import { SimpleSidebar } from "@/components/simple-sidebar";
 import { BreakingNewsTicker } from "@/components/breaking-news-ticker";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -320,10 +321,12 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className={cn(
-          "sticky z-40 h-16 bg-white dark:bg-black border-b-2 border-black dark:border-white flex items-center justify-between px-4 lg:px-8",
-          breakingNews.length > 0 ? "top-[42px]" : "top-0"
-        )}>
+        <header 
+          className={cn(
+            "sticky z-40 h-16 bg-white dark:bg-black border-b-2 border-black dark:border-white flex items-center justify-between px-4 lg:px-8",
+            breakingNews.length > 0 ? "top-[42px]" : "top-0"
+          )}
+        >
           <div className="flex items-center gap-4 flex-1">
             <Button
               variant="ghost"
@@ -338,7 +341,7 @@ export default function Home() {
               <Input
                 type="text"
                 placeholder="ප්‍රවෘත්ති සොයන්න..."
-                className="w-full border-2 border-gray-300 dark:border-gray-700 rounded-full py-2 pl-10 pr-4 text-sm bg-white dark:bg-black text-black dark:text-white focus:border-black dark:focus:border-white sinhala-text"
+                className="w-full border-2 border-gray-300 dark:border-gray-700 rounded-full py-2 pl-10 pr-4 text-sm bg-white dark:bg-black text-black dark:text-white focus:border-black dark:focus:border-white sinhala-text max-w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -377,16 +380,16 @@ export default function Home() {
 
             {/* Autoplay Consent */}
             {autoplayConsent === null && filteredNews.length > 0 && (
-              <div className="border-2 border-black dark:border-white p-4 flex items-center justify-between mb-6 bg-gray-50 dark:bg-gray-900">
-                <p className="text-sm sinhala-text text-black dark:text-white">
+              <div className="border-2 border-black dark:border-white p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 lg:mb-6 bg-gray-50 dark:bg-gray-900">
+                <p className="text-xs sm:text-sm sinhala-text text-black dark:text-white flex-1">
                   ප්‍රධාන පුවත් 5ක් ස්වයංක්‍රීයව හඬ මගින් වාර්තා කිරීමට ඔබ කැමතිද?
                 </p>
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setAutoplayConsent(false)}
-                    className="border-2 border-black dark:border-white text-black dark:text-white"
+                    className="border-2 border-black dark:border-white text-black dark:text-white flex-1 sm:flex-initial text-xs sm:text-sm"
                   >
                     පසුවට
                   </Button>
@@ -396,7 +399,7 @@ export default function Home() {
                       setAutoplayConsent(true);
                       handlePlayTop5();
                     }}
-                    className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-white"
+                    className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-white flex-1 sm:flex-initial text-xs sm:text-sm"
                   >
                     <Play size={14} className="mr-2" /> දැන් අහන්න
                   </Button>
@@ -414,9 +417,9 @@ export default function Home() {
 
             {/* News Grid */}
             {isLoadingNews ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="border-2 border-gray-200 dark:border-gray-800 rounded-lg p-4 animate-pulse bg-white dark:bg-black">
+                  <div key={i} className="border-2 border-gray-200 dark:border-gray-800 rounded-lg p-3 sm:p-4 animate-pulse bg-white dark:bg-black">
                     <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
                     <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mb-4"></div>
                     <div className="h-12 w-12 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
@@ -424,13 +427,13 @@ export default function Home() {
                 ))}
               </div>
             ) : filteredNews.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-gray-600 dark:text-gray-400 sinhala-text">
+              <div className="text-center py-12 sm:py-20">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 sinhala-text">
                   සෙවීමට අදාළ පුවත් කිසිවක් හමු නොවීය.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredNews.map((item) => {
                   const queueIndex = queue.findIndex((q) => q.id === item.id);
                   const isCurrent = queueIndex !== -1 && queueIndex === currentIndex;
@@ -463,25 +466,48 @@ export default function Home() {
       </main>
       </div>
 
-      {/* Simple Audio Player */}
+      {/* Audio Player - Mini on mobile, Full on desktop */}
       {queue.length > 0 && (
-        <SimpleAudioPlayer
-          queue={queue}
-          currentIndex={currentIndex}
-          isPlaying={isPlaying}
-          currentTime={currentTime}
-          duration={duration}
-          volume={volume}
-          onPlay={handlePlay}
-          onPause={() => {
-            setIsPlaying(false);
-            audioRef.current?.pause();
-          }}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onVolumeChange={setVolume}
-          audioRef={audioRef}
-        />
+        <>
+          {/* Mini Player - Mobile only */}
+          <MiniAudioPlayer
+            queue={queue}
+            currentIndex={currentIndex}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            onPlay={handlePlay}
+            onPause={() => {
+              setIsPlaying(false);
+              audioRef.current?.pause();
+            }}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onClose={() => {
+              clearQueue();
+            }}
+            audioRef={audioRef}
+          />
+          
+          {/* Full Player - Desktop only */}
+          <SimpleAudioPlayer
+            queue={queue}
+            currentIndex={currentIndex}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            volume={volume}
+            onPlay={handlePlay}
+            onPause={() => {
+              setIsPlaying(false);
+              audioRef.current?.pause();
+            }}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onVolumeChange={setVolume}
+            audioRef={audioRef}
+          />
+        </>
       )}
     </div>
   );
