@@ -227,22 +227,47 @@ export default function Home() {
   };
 
   const generateAudioForItem = async (item: NewsItem, queueIndex: number) => {
+    // #region agent log
+    if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:229',message:'generateAudioForItem entry',data:{item_id:item.id,queue_index:queueIndex,text_preview:item.text.substring(0,50),is_generating:isGenerating.has(item.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+    // #endregion
     if (isGenerating.has(item.id)) return;
 
     setIsGenerating((prev) => new Set(prev).add(item.id));
     try {
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:234',message:'generateAudioForItem calling synthesizeText',data:{text_length:item.text.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const blob = await synthesizeText(item.text);
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:236',message:'generateAudioForItem got blob',data:{blob_size:blob.size,blob_type:blob.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const url = URL.createObjectURL(blob);
-
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:238',message:'generateAudioForItem created object URL',data:{url,queue_index:queueIndex,current_index:currentIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       updateQueueItem(queueIndex, { audioUrl: url, audioBlob: blob });
       
       // Auto-play if it's the current item
       if (queueIndex === currentIndex) {
+        // #region agent log
+        if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:242',message:'generateAudioForItem calling contextPlayAudio',data:{url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         contextPlayAudio(url);
       }
     } catch (err) {
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:244',message:'generateAudioForItem error',data:{error_type:err instanceof Error ? err.constructor.name : typeof err,error_message:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+      // #endregion
       console.error("Error generating audio:", err);
-      setError(err instanceof Error ? err.message : "Failed to generate audio");
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate audio";
+      // Provide more helpful error message if model isn't loaded
+      if (errorMessage.includes("Failed to load TTS model")) {
+        setError("TTS model is not loaded. Please contact the administrator to upload the model to Modal.");
+      } else {
+        setError(errorMessage);
+      }
+      // Remove item from queue if audio generation failed
+      updateQueueItem(queueIndex, { audioUrl: undefined, audioBlob: undefined });
     } finally {
       setIsGenerating((prev) => {
         const newSet = new Set(prev);
@@ -253,9 +278,15 @@ export default function Home() {
   };
 
   const handlePlayItem = async (item: NewsItem) => {
+    // #region agent log
+    if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:280',message:'handlePlayItem entry',data:{item_id:item.id,queue_length:queue.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     // Check if item is already in queue
     const existingIndex = queue.findIndex((q) => q.id === item.id);
     if (existingIndex !== -1) {
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:285',message:'handlePlayItem existing item',data:{existing_index:existingIndex,has_audio_url:!!queue[existingIndex].audioUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setCurrentIndex(existingIndex);
       if (queue[existingIndex].audioUrl) {
         contextPlayAudio(queue[existingIndex].audioUrl!);
@@ -264,8 +295,12 @@ export default function Home() {
       }
     } else {
       // Add to queue and generate
-      addToQueue(item);
+      // Calculate the new index before adding (will be current length)
       const newIndex = queue.length;
+      // #region agent log
+      if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:295',message:'handlePlayItem adding new item',data:{queue_length_before:queue.length,new_index:newIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      addToQueue(item);
       setCurrentIndex(newIndex);
       await generateAudioForItem(item, newIndex);
     }

@@ -76,6 +76,9 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const playAudio = React.useCallback((url: string) => {
+    // #region agent log
+    if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'audio-queue-context.tsx:78',message:'playAudio entry',data:{url,playback_speed:playbackSpeed,volume,has_audio_ref:!!audioRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -101,12 +104,21 @@ export function AudioQueueProvider({ children }: { children: React.ReactNode }) 
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
 
+    // #region agent log
+    if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'audio-queue-context.tsx:104',message:'playAudio calling audio.play',data:{url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     audio.play()
       .then(() => {
+        // #region agent log
+        if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'audio-queue-context.tsx:107',message:'playAudio play success',data:{duration:audio.duration},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         setIsPlaying(true);
         setDuration(audio.duration);
       })
       .catch((err) => {
+        // #region agent log
+        if (typeof window !== 'undefined') fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'audio-queue-context.tsx:110',message:'playAudio play error',data:{error_type:err.constructor.name,error_message:err.message,error_name:err.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         console.error("Playback error:", err);
         setIsPlaying(false);
       });

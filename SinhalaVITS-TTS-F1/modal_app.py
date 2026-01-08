@@ -25,7 +25,7 @@ model_volume = modal.Volume.from_name("sinhala-tts-models", create_if_missing=Tr
 
 # Define the image with all dependencies
 image = (
-    modal.Image.debian_slim(python_version="3.9")
+    modal.Image.debian_slim(python_version="3.10")
     .apt_install("git", "ffmpeg")
     .pip_install(
         "torch>=2.0.0",
@@ -234,42 +234,65 @@ def cache_audio(text, audio_bytes):
 # Global synthesizer (loaded once per container)
 synth = None
 model_loaded = False
+model_load_error = None
 
 
 def load_model():
     """Load the TTS model."""
-    global synth, model_loaded
+    global synth, model_loaded, model_load_error
     
     if model_loaded:
         return True
     
     try:
-        from TTS.utils.synthesizer import Synthesizer
+        import os
+        logger.info("Attempting to import TTS...")
+        try:
+            from TTS.utils.synthesizer import Synthesizer
+            logger.info("TTS import successful")
+        except ImportError as import_err:
+            model_load_error = f"Failed to import TTS: {import_err}"
+            logger.error(model_load_error)
+            return False
+        
         import torch
+        logger.info(f"PyTorch version: {torch.__version__}")
+        logger.info(f"CUDA available: {torch.cuda.is_available()}")
         
         if not os.path.exists(MODEL_PATH):
-            raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
+            model_load_error = f"Model file not found: {MODEL_PATH}"
+            raise FileNotFoundError(model_load_error)
         
         if not os.path.exists(CONFIG_PATH):
-            raise FileNotFoundError(f"Config file not found: {CONFIG_PATH}")
+            model_load_error = f"Config file not found: {CONFIG_PATH}"
+            raise FileNotFoundError(model_load_error)
         
         logger.info(f"Loading model from {MODEL_PATH}...")
         use_cuda = torch.cuda.is_available()
         device = "cuda" if use_cuda else "cpu"
         logger.info(f"Using device: {device}")
         
+        logger.info("Creating Synthesizer instance...")
         synth = Synthesizer(
             tts_checkpoint=MODEL_PATH,
             tts_config_path=CONFIG_PATH,
             use_cuda=use_cuda
         )
+        logger.info("Synthesizer created successfully")
         
         model_loaded = True
+        model_load_error = None
         logger.info("Model loaded successfully!")
         return True
         
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        model_load_error = f"{str(e)}\n{error_trace}"
         logger.error(f"Failed to load model: {e}")
+        logger.error(f"Traceback: {error_trace}")
+        print(f"ERROR loading model: {e}")
+        print(f"Traceback: {error_trace}")
         return False
 
 
@@ -305,7 +328,11 @@ async def synthesize(request_body: dict):
         # Validate input
         is_valid, error_msg = validate_sinhala_text(text)
         if not is_valid:
-            return {"error": error_msg}, 400
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                content={"error": error_msg},
+                status_code=400,
+            )
         
         # Check cache first
         cached_audio = get_cached_audio(text)
@@ -317,12 +344,44 @@ async def synthesize(request_body: dict):
             )
         
         # Load model if not loaded
-        if not load_model():
-            return {"error": "Failed to load TTS model"}, 500
-        
-        # Romanize Sinhala text
         try:
-            from romanizer import sinhala_to_roman
+            load_result = load_model()
+            if not load_result:
+                from fastapi.responses import JSONResponse
+                # Try to get more details about why loading failed
+                import os
+                model_exists = os.path.exists(MODEL_PATH)
+                config_exists = os.path.exists(CONFIG_PATH)
+                return JSONResponse(
+                    content={
+                        "error": "Failed to load TTS model",
+                        "details": {
+                            "model_path": MODEL_PATH,
+                            "config_path": CONFIG_PATH,
+                            "model_exists": model_exists,
+                            "config_exists": config_exists,
+                            "load_error": model_load_error if 'model_load_error' in globals() else "Unknown error"
+                        }
+                    },
+                    status_code=500,
+                )
+        except Exception as load_err:
+            from fastapi.responses import JSONResponse
+            import traceback
+            error_details = traceback.format_exc()
+            logger.error(f"Exception during model loading: {load_err}")
+            logger.error(f"Traceback: {error_details}")
+            return JSONResponse(
+                content={
+                    "error": "Exception during model loading",
+                    "details": str(load_err),
+                    "traceback": error_details
+                },
+                status_code=500,
+            )
+        
+        # Romanize Sinhala text (function is embedded above)
+        try:
             romanized = sinhala_to_roman(text)
             logger.info(f"Romanized text: {romanized[:50]}...")
         except Exception as e:
@@ -356,7 +415,11 @@ async def synthesize(request_body: dict):
         
     except Exception as e:
         logger.error(f"Error in synthesize: {e}")
-        return {"error": str(e)}, 500
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500,
+        )
 
 
 @app.function(
@@ -409,6 +472,10 @@ def main():
 def upload_model():
     """Upload model files to Modal volume."""
     import subprocess
+    from pathlib import Path
+    
+    print("Starting model upload...")
+    logger.info("Starting model upload...")
     
     # Download model from Hugging Face if not present
     model_dir = Path("/models")
@@ -417,7 +484,13 @@ def upload_model():
     model_file = model_dir / "Nipunika_210000.pth"
     config_file = model_dir / "Nipunika_config.json"
     
+    print(f"Checking for model file: {model_file}")
+    print(f"Model file exists: {model_file.exists()}")
+    print(f"Checking for config file: {config_file}")
+    print(f"Config file exists: {config_file.exists()}")
+    
     if not model_file.exists():
+        print("Downloading model from Hugging Face...")
         logger.info("Downloading model from Hugging Face...")
         # Use huggingface_hub to download
         try:
@@ -427,12 +500,17 @@ def upload_model():
                 filename="Nipunika_210000.pth",
                 local_dir="/models",
             )
+            print(f"Model downloaded to {model_path}")
             logger.info(f"Model downloaded to {model_path}")
         except Exception as e:
+            print(f"Failed to download model: {e}")
             logger.error(f"Failed to download model: {e}")
             return {"error": str(e)}
+    else:
+        print(f"Model file already exists at {model_file}")
     
     if not config_file.exists():
+        print("Downloading config from Hugging Face...")
         logger.info("Downloading config from Hugging Face...")
         try:
             from huggingface_hub import hf_hub_download
@@ -441,13 +519,27 @@ def upload_model():
                 filename="Nipunika_config.json",
                 local_dir="/models",
             )
+            print(f"Config downloaded to {config_path}")
             logger.info(f"Config downloaded to {config_path}")
         except Exception as e:
+            print(f"Failed to download config: {e}")
             logger.error(f"Failed to download config: {e}")
             return {"error": str(e)}
+    else:
+        print(f"Config file already exists at {config_file}")
     
-    # Commit volume changes
-    model_volume.commit()
-    
-    return {"success": True, "message": "Model files uploaded to volume"}
+    # Verify files exist before committing
+    if model_file.exists() and config_file.exists():
+        print(f"Both files exist. Model size: {model_file.stat().st_size / (1024*1024):.2f} MB")
+        print("Committing volume changes...")
+        # Commit volume changes
+        model_volume.commit()
+        print("Volume committed successfully!")
+        result = {"success": True, "message": "Model files uploaded to volume"}
+        print(f"Result: {result}")
+        return result
+    else:
+        error_msg = f"Files missing. Model exists: {model_file.exists()}, Config exists: {config_file.exists()}"
+        print(error_msg)
+        return {"error": error_msg}
 
