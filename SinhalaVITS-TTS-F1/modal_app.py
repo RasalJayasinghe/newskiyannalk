@@ -258,8 +258,8 @@ def health():
 def fetch_news():
     """Fetch news from Ada Derana."""
     try:
-                import sys
-                sys.path.insert(0, '/root')
+        import sys
+        sys.path.insert(0, '/root')
         from news_scraper import scrape_adaderana
         result = scrape_adaderana()
         return result
