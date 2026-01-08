@@ -21,8 +21,8 @@ const notoSinhala = Noto_Sans_Sinhala({
 });
 
 export const metadata: Metadata = {
-  title: "Sinhala Text-to-Speech",
-  description: "Convert Sinhala Unicode text to natural speech using SinhalaVITS-TTS-F1",
+  title: "newskiyanna - සිංහල පුවත් හඬ මගින්",
+  description: "Listen to Sinhala news headlines with AI-powered voice",
 };
 
 export default function RootLayout({
