@@ -16,8 +16,8 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className={className}>
-        <Sun size={20} />
+      <Button variant="ghost" size="icon" className={cn("h-9 w-9 sm:h-10 sm:w-10", className)}>
+        <Sun size={18} className="sm:w-5 sm:h-5" />
       </Button>
     );
   }
@@ -29,13 +29,13 @@ export function ThemeToggle({ className }: { className?: string }) {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className={cn(className)}
+      className={cn("h-9 w-9 sm:h-10 sm:w-10", className)}
       aria-label="Toggle theme"
     >
       {isDark ? (
-        <Sun size={20} className="text-black dark:text-white" />
+        <Sun size={18} className="sm:w-5 sm:h-5 text-black dark:text-white" />
       ) : (
-        <Moon size={20} className="text-black dark:text-white" />
+        <Moon size={18} className="sm:w-5 sm:h-5 text-black dark:text-white" />
       )}
     </Button>
   );

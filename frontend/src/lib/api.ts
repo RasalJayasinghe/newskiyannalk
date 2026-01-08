@@ -76,19 +76,10 @@ export async function checkHealth(): Promise<HealthResponse> {
  * Synthesize Sinhala text to speech
  */
 export async function synthesizeText(text: string): Promise<Blob> {
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:78',message:'synthesizeText entry',data:{text_length:text.length,has_synthesize_url:!!SYNTHESIZE_URL,synthesize_url:SYNTHESIZE_URL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
-  // #endregion
   if (!SYNTHESIZE_URL) {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:81',message:'synthesizeText error - no URL',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     throw new Error('TTS endpoint not configured. Please set NEXT_PUBLIC_SYNTHESIZE_URL environment variable.');
   }
   
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:85',message:'synthesizeText before fetch',data:{url:SYNTHESIZE_URL,text_preview:text.substring(0,50)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
   const response = await fetch(SYNTHESIZE_URL, {
     method: 'POST',
     headers: {
@@ -97,42 +88,22 @@ export async function synthesizeText(text: string): Promise<Blob> {
     body: JSON.stringify({ text }),
   });
 
-  // #region agent log
   const contentType = response.headers.get('content-type');
-  const responseStatus = response.status;
-  const responseOk = response.ok;
-  fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:99',message:'synthesizeText after fetch',data:{status:responseStatus,ok:responseOk,content_type:contentType,headers:Object.fromEntries(response.headers.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C'})}).catch(()=>{});
-  // #endregion
 
   if (!response.ok) {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:102',message:'synthesizeText response not ok',data:{status:responseStatus,content_type:contentType},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     // Try to parse error response
     if (contentType && contentType.includes('application/json')) {
       const error: ErrorResponse = await response.json();
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:107',message:'synthesizeText parsed error',data:{error:error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       throw new Error(error.details || error.error || 'Failed to generate speech');
     }
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
   // Check if response is audio
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:115',message:'synthesizeText checking content type',data:{content_type:contentType,includes_audio_wav:contentType?.includes('audio/wav'),all_headers:Object.fromEntries(response.headers.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
   if (contentType && contentType.includes('audio/wav')) {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:118',message:'synthesizeText returning blob',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     return response.blob();
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/33653e76-7dbd-46c1-8b89-1778254aae3c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:123',message:'synthesizeText unexpected response type',data:{content_type:contentType,response_text_preview:await response.clone().text().then(t=>t.substring(0,200)).catch(()=>'could not read')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
   throw new Error('Unexpected response type');
 }
 

@@ -159,10 +159,14 @@ export default function Home() {
     }
   }, []);
 
-  // Health check and initial load
+  // Initial load - don't block on health check
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
     
+    // Load news immediately (non-blocking)
+    loadNews();
+    
+    // Health check in background (non-blocking)
     const checkHealthStatus = async () => {
       try {
         const response = await checkHealth();
@@ -173,9 +177,9 @@ export default function Home() {
         setIsHealthCheckLoading(false);
       }
     };
-
+    
+    // Don't wait for health check to finish
     checkHealthStatus();
-    loadNews();
   }, [loadNews]);
 
   // Polling
@@ -320,34 +324,35 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
+        {/* Header - Compact on mobile */}
         <header 
           className={cn(
-            "sticky z-40 h-16 bg-white dark:bg-black border-b-2 border-black dark:border-white flex items-center justify-between px-4 lg:px-8",
-            breakingNews.length > 0 ? "top-[42px]" : "top-0"
+            "sticky z-40 bg-white dark:bg-black border-b-2 border-black dark:border-white flex items-center justify-between px-2 sm:px-4 lg:px-8",
+            breakingNews.length > 0 ? "top-[42px]" : "top-0",
+            "h-12 sm:h-14 lg:h-16"
           )}
         >
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-black dark:text-white"
+              className="lg:hidden text-black dark:text-white h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
             >
-              <Menu size={24} />
+              <Menu size={20} className="sm:w-6 sm:h-6" />
             </Button>
-            <div className="relative max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" size={16} />
               <Input
                 type="text"
-                placeholder="ප්‍රවෘත්ති සොයන්න..."
-                className="w-full border-2 border-gray-300 dark:border-gray-700 rounded-full py-2 pl-10 pr-4 text-sm bg-white dark:bg-black text-black dark:text-white focus:border-black dark:focus:border-white sinhala-text max-w-full"
+                placeholder="සොයන්න..."
+                className="w-full border-2 border-gray-300 dark:border-gray-700 rounded-full py-1.5 sm:py-2 pl-8 sm:pl-10 pr-3 sm:pr-4 text-xs sm:text-sm bg-white dark:bg-black text-black dark:text-white focus:border-black dark:focus:border-white sinhala-text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <ThemeToggle />
           </div>
         </header>
@@ -461,8 +466,8 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Add padding bottom for audio player */}
-        {queue.length > 0 && <div className="h-20 lg:h-24"></div>}
+        {/* Add padding bottom for audio player - smaller on mobile */}
+        {queue.length > 0 && <div className="h-12 lg:h-24"></div>}
       </main>
       </div>
 

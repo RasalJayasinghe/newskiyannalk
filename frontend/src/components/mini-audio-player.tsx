@@ -56,10 +56,10 @@ export function MiniAudioPlayer({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black border-t-2 border-black dark:border-white shadow-lg lg:ml-64">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black border-t-2 border-black dark:border-white shadow-lg">
       {/* Progress Bar */}
       <div
-        className="h-1 bg-gray-200 dark:bg-gray-800 cursor-pointer"
+        className="h-0.5 bg-gray-200 dark:bg-gray-800 cursor-pointer"
         onClick={handleProgressClick}
       >
         <div
@@ -68,59 +68,56 @@ export function MiniAudioPlayer({
         ></div>
       </div>
 
-      {/* Player Content */}
-      <div className="flex items-center justify-between p-3 gap-3">
-        {/* Left: Track Info */}
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      {/* Player Content - Compact */}
+      <div className="flex items-center justify-between px-2 py-1.5 gap-2">
+        {/* Left: Play Button + Track Info */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <Button
             onClick={isPlaying ? onPause : onPlay}
             size="icon"
-            className="h-10 w-10 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 flex-shrink-0"
+            className="h-8 w-8 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 flex-shrink-0"
           >
             {isPlaying ? (
-              <Pause size={16} fill="currentColor" />
+              <Pause size={14} fill="currentColor" />
             ) : (
-              <Play size={16} fill="currentColor" />
+              <Play size={14} fill="currentColor" />
             )}
           </Button>
           <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold truncate sinhala-text text-black dark:text-white">
+            <h4 className="text-xs font-semibold truncate sinhala-text text-black dark:text-white leading-tight">
               {currentItem.title}
             </h4>
-            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-              {currentItem.time}
-            </p>
           </div>
         </div>
 
         {/* Right: Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={onPrevious}
             disabled={currentIndex === 0}
-            className="h-8 w-8 text-black dark:text-white"
+            className="h-7 w-7 text-black dark:text-white"
           >
-            <ChevronRight size={18} className="rotate-180" />
+            <ChevronRight size={14} className="rotate-180" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={onNext}
             disabled={currentIndex >= queue.length - 1}
-            className="h-8 w-8 text-black dark:text-white"
+            className="h-7 w-7 text-black dark:text-white"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={14} />
           </Button>
           {onClose && (
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 text-black dark:text-white"
+              className="h-7 w-7 text-black dark:text-white"
             >
-              <X size={18} />
+              <X size={14} />
             </Button>
           )}
         </div>
