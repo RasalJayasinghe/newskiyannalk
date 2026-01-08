@@ -252,11 +252,14 @@ def health():
     image=image,
     volumes={"/models": model_volume},
     timeout=60,
+    
 )
 @modal.fastapi_endpoint(method="GET", label="fetch-news")
 def fetch_news():
     """Fetch news from Ada Derana."""
     try:
+                import sys
+                sys.path.insert(0, '/root')
         from news_scraper import scrape_adaderana
         result = scrape_adaderana()
         return result
