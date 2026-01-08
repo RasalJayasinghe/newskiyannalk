@@ -120,12 +120,29 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-white text-foreground;
+    @apply bg-white dark:bg-black text-black dark:text-white;
     font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
   }
   
   .sinhala-text {
     font-family: var(--font-sinhala), 'Noto Sans Sinhala', sans-serif;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll {
+    animation: scroll 30s linear infinite;
+  }
+
+  .animate-scroll:hover {
+    animation-play-state: paused;
   }
 }
 

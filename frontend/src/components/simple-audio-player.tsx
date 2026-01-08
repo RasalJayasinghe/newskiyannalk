@@ -63,14 +63,14 @@ export function SimpleAudioPlayer({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-black p-4 lg:ml-64 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black border-t-2 border-black dark:border-white p-4 lg:ml-64 flex flex-col md:flex-row items-center justify-between gap-4">
       {/* Left: Current Track Info */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold truncate sinhala-text text-black">
+          <h4 className="text-sm font-semibold truncate sinhala-text text-black dark:text-white">
             {currentItem.title}
           </h4>
-          <p className="text-xs text-gray-600 truncate">
+          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
             {currentItem.time}
           </p>
         </div>
@@ -83,18 +83,19 @@ export function SimpleAudioPlayer({
           size="icon"
           onClick={onPrevious}
           disabled={currentIndex === 0}
+          className="text-black dark:text-white"
         >
           <ChevronRight size={24} className="rotate-180" />
         </Button>
         <Button
           onClick={isPlaying ? onPause : onPlay}
           size="icon"
-          className="h-12 w-12 rounded-full bg-black text-white hover:bg-gray-800"
+          className="h-12 w-12 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
         >
           {isPlaying ? (
-            <Pause size={20} fill="white" />
+            <Pause size={20} fill="currentColor" />
           ) : (
-            <Play size={20} fill="white" />
+            <Play size={20} fill="currentColor" />
           )}
         </Button>
         <Button
@@ -102,6 +103,7 @@ export function SimpleAudioPlayer({
           size="icon"
           onClick={onNext}
           disabled={currentIndex >= queue.length - 1}
+          className="text-black dark:text-white"
         >
           <ChevronRight size={24} />
         </Button>
@@ -109,10 +111,10 @@ export function SimpleAudioPlayer({
 
       {/* Right: Volume */}
       <div className="flex items-center gap-2 w-32 flex-1 justify-end">
-        <Volume2 size={16} className="text-gray-600" />
-        <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden relative">
+        <Volume2 size={16} className="text-gray-600 dark:text-gray-400" />
+        <div className="flex-1 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden relative">
           <div
-            className="h-full bg-black transition-all"
+            className="h-full bg-black dark:bg-white transition-all"
             style={{ width: `${volume * 100}%` }}
           ></div>
           <input
@@ -129,11 +131,11 @@ export function SimpleAudioPlayer({
 
       {/* Progress Bar (Full Width) */}
       <div
-        className="absolute top-0 left-0 right-0 h-1 bg-gray-200 cursor-pointer"
+        className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-800 cursor-pointer"
         onClick={handleProgressClick}
       >
         <div
-          className="h-full bg-black transition-all"
+          className="h-full bg-black dark:bg-white transition-all"
           style={{ width: `${progress}%` }}
         ></div>
       </div>

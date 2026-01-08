@@ -29,7 +29,9 @@ export function SimpleNewsCard({
     <Card
       className={cn(
         "group relative transition-all duration-200 hover:shadow-lg border-2",
-        isPlaying ? "border-black shadow-lg" : "border-gray-200 hover:border-gray-400"
+        "bg-white dark:bg-black",
+        "border-black dark:border-white",
+        isPlaying && "shadow-lg ring-2 ring-black dark:ring-white"
       )}
     >
       <CardContent className="p-4">
@@ -40,10 +42,10 @@ export function SimpleNewsCard({
                 Breaking
               </Badge>
             )}
-            <h3 className="font-semibold text-base leading-snug sinhala-text line-clamp-2 mb-2">
+            <h3 className="font-semibold text-base leading-snug sinhala-text line-clamp-2 mb-2 text-black dark:text-white">
               {news.title}
             </h3>
-            <p className="text-xs text-gray-600 mb-2">{news.time}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{news.time}</p>
           </div>
           
           {/* Play Button - Prominent */}
@@ -57,21 +59,21 @@ export function SimpleNewsCard({
             className={cn(
               "h-12 w-12 rounded-full flex-shrink-0",
               isPlaying
-                ? "bg-black text-white hover:bg-gray-800"
-                : "bg-white border-2 border-black text-black hover:bg-gray-100"
+                ? "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+                : "bg-white dark:bg-black border-2 border-black dark:border-white text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900"
             )}
           >
             {isGenerating ? (
               <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Play size={20} className={isPlaying ? "fill-white" : "fill-black"} />
+              <Play size={20} className={isPlaying ? "fill-white dark:fill-black" : "fill-black dark:fill-white"} />
             )}
           </Button>
         </div>
 
         {/* Category Badge */}
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs border-black dark:border-white text-black dark:text-white">
             {news.category}
           </Badge>
           
@@ -83,10 +85,10 @@ export function SimpleNewsCard({
                 e.stopPropagation();
                 onListenLater();
               }}
-              className="h-8 w-8"
+              className="h-8 w-8 text-black dark:text-white"
             >
               {isInListenLater ? (
-                <BookmarkCheck className="h-4 w-4 text-black" />
+                <BookmarkCheck className="h-4 w-4" />
               ) : (
                 <Bookmark className="h-4 w-4" />
               )}
