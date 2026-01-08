@@ -382,60 +382,13 @@ def health():
 @modal.fastapi_endpoint(method="GET", label="fetch-news")
 def fetch_news():
     """Fetch news from Ada Derana."""
-    debug_info = {"step": "entry", "hypothesis": "A,B,C,E"}
     try:
-        import sys
-        import os
-        # #region agent log
-        debug_info["sys_path_before"] = sys.path.copy()
-        debug_info["cwd"] = os.getcwd()
-        # #endregion
-        sys.path.insert(0, '/root')
-        # #region agent log
-        debug_info["sys_path_after"] = sys.path.copy()
-        # #endregion
-        
-        # #region agent log
-        paths_to_check = ['/root', '/root/news_scraper.py', '/tmp', os.getcwd(), '/root/romanizer.py']
-        file_checks = {}
-        for p in paths_to_check:
-            file_checks[p] = os.path.exists(p)
-        debug_info["file_checks"] = file_checks
-        debug_info["hypothesis"] = "A,B"
-        # #endregion
-        
-        # #region agent log
-        try:
-            import requests
-            import bs4
-            deps_available = {"requests": True, "beautifulsoup4": True}
-        except ImportError as deps_err:
-            deps_available = {"requests": False, "beautifulsoup4": False, "error": str(deps_err)}
-        debug_info["dependencies"] = deps_available
-        debug_info["hypothesis"] = "D"
-        # #endregion
-        
-        # #region agent log
-        debug_info["step"] = "calling_scrape_function"
-        debug_info["hypothesis"] = "A,B,C"
-        # #endregion
         # scrape_adaderana function is embedded above (no import needed)
         result = scrape_adaderana()
-        # #region agent log
-        debug_info["step"] = "scrape_successful"
-        # #endregion
         return result
     except Exception as e:
-        # #region agent log
-        import traceback
-        debug_info["step"] = "error"
-        debug_info["error_type"] = type(e).__name__
-        debug_info["error_msg"] = str(e)
-        debug_info["traceback"] = traceback.format_exc()
-        debug_info["hypothesis"] = "A,B,C,D,E"
-        # #endregion
         logger.error(f"Error fetching news: {e}")
-        return {"success": False, "error": str(e), "debug_info": debug_info, "items": []}, 500
+        return {"success": False, "error": str(e), "items": []}, 500
 
 
 @app.local_entrypoint()
