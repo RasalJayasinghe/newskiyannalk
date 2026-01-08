@@ -5,9 +5,11 @@
  * For local development, set NEXT_PUBLIC_API_URL to http://localhost:8000
  * 
  * Modal endpoint URLs (set in Vercel environment variables):
- * - NEXT_PUBLIC_SYNTHESIZE_URL: https://<workspace>--sinhala-tts-synthesize.modal.run
- * - NEXT_PUBLIC_HEALTH_URL: https://<workspace>--sinhala-tts-health.modal.run
- * - NEXT_PUBLIC_NEWS_URL: https://<workspace>--sinhala-tts-fetch-news.modal.run
+ * - NEXT_PUBLIC_SYNTHESIZE_URL: https://rasaljayasinghe--synthesize.modal.run
+ * - NEXT_PUBLIC_HEALTH_URL: https://rasaljayasinghe--health.modal.run
+ * - NEXT_PUBLIC_NEWS_URL: https://rasaljayasinghe--fetch-news.modal.run
+ * 
+ * Updated: Modal endpoints deployed and ready
  */
 
 // Only use localhost in development (not in production)

@@ -24,6 +24,7 @@ app = modal.App("sinhala-tts")
 model_volume = modal.Volume.from_name("sinhala-tts-models", create_if_missing=True)
 
 # Define the image with all dependencies
+# We'll use mounts to include the local files at runtime
 image = (
     modal.Image.debian_slim(python_version="3.9")
     .apt_install("git", "ffmpeg")
@@ -33,18 +34,16 @@ image = (
         "numpy",
         "soundfile",
         "pydub",
-        "flask==3.0.3",
-        "flask-cors>=4.0.0",
+        "fastapi>=0.104.0",
         "beautifulsoup4>=4.12.0",
         "requests>=2.31.0",
         "lxml>=4.9.0",
-        "gunicorn>=21.2.0",
         "huggingface-hub",
     )
-    .copy_local_file("news_scraper.py", "/root/news_scraper.py")
-    .copy_local_file("romanizer.py", "/root/romanizer.py")
     .env({"PYTHONPATH": "/root"})
 )
+
+# Modal automatically mounts local Python files, so we don't need explicit mounts
 
 # Model paths
 MODEL_PATH = "/models/Nipunika_210000.pth"
@@ -153,32 +152,27 @@ def load_model():
     gpu="T4",  # Use T4 GPU for faster inference (free tier supports T4)
     volumes={"/models": model_volume},
     timeout=300,  # 5 minute timeout
-    keep_warm=1,  # Keep 1 container warm to reduce cold starts
+    min_containers=1,  # Keep 1 container warm to reduce cold starts
 )
-@modal.web_endpoint(method="POST", label="synthesize")
-def synthesize(request: modal.web.Request):
+@modal.fastapi_endpoint(method="POST", label="synthesize")
+async def synthesize(request_body: dict):
     """
     Synthesize Sinhala text to speech.
     
     Args:
-        request: Modal web request object
+        request_body: JSON request body with 'text' field
         
     Returns:
         Audio file as bytes
     """
     try:
         # Parse JSON body
-        try:
-            body = request.json()
-            text = body.get("text", "")
-        except:
-            # Fallback to form data or query params
-            text = request.form.get("text", "") or request.args.get("text", "")
+        text = request_body.get("text", "") if isinstance(request_body, dict) else ""
         
         if not text:
-            return modal.web.Response(
-                body='{"error": "Text parameter is required"}',
-                headers={"Content-Type": "application/json"},
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                content={"error": "Text parameter is required"},
                 status_code=400,
             )
         
@@ -190,9 +184,10 @@ def synthesize(request: modal.web.Request):
         # Check cache first
         cached_audio = get_cached_audio(text)
         if cached_audio:
-            return modal.web.Response(
-                body=cached_audio,
-                headers={"Content-Type": "audio/wav"},
+            from fastapi.responses import Response
+            return Response(
+                content=cached_audio,
+                media_type="audio/wav",
             )
         
         # Load model if not loaded
@@ -227,9 +222,10 @@ def synthesize(request: modal.web.Request):
         # Cache the audio
         cache_audio(text, audio_bytes)
         
-        return modal.web.Response(
-            body=audio_bytes,
-            headers={"Content-Type": "audio/wav"},
+        from fastapi.responses import Response
+        return Response(
+            content=audio_bytes,
+            media_type="audio/wav",
         )
         
     except Exception as e:
@@ -242,7 +238,7 @@ def synthesize(request: modal.web.Request):
     volumes={"/models": model_volume},
     timeout=60,
 )
-@modal.web_endpoint(method="GET", label="health")
+@modal.fastapi_endpoint(method="GET", label="health")
 def health():
     """Health check endpoint."""
     return {
@@ -257,7 +253,7 @@ def health():
     volumes={"/models": model_volume},
     timeout=60,
 )
-@modal.web_endpoint(method="GET", label="fetch-news")
+@modal.fastapi_endpoint(method="GET", label="fetch-news")
 def fetch_news():
     """Fetch news from Ada Derana."""
     try:
