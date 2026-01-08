@@ -145,9 +145,26 @@ export default function Home() {
     setFilteredNews(filtered);
   }, [newsItems, categoryFilter, timeFilter, searchQuery]);
 
+  // Health check
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkHealthStatus = async () => {
+      try {
+        const response = await checkHealth();
+        setIsHealthy(response.status === "ok" && response.model_loaded);
+      } catch (err) {
+        setIsHealthy(false);
+      } finally {
+        setIsHealthCheckLoading(false);
+      }
+    };
+
+    checkHealthStatus();
+  }, []);
+
   // Load news
   const loadNews = React.useCallback(async (silent = false) => {
-    if (typeof window === 'undefined') return;
     if (!silent) setIsLoadingNews(true);
     setError(null);
     try {
@@ -165,33 +182,21 @@ export default function Home() {
     }
   }, []);
 
-  // Health check and initial load
+  // Initial load
   React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const checkHealthStatus = async () => {
-      try {
-        const response = await checkHealth();
-        setIsHealthy(response.status === "ok" && response.model_loaded);
-      } catch (err) {
-        setIsHealthy(false);
-      } finally {
-        setIsHealthCheckLoading(false);
-      }
-    };
-
-    checkHealthStatus();
-    loadNews();
+    if (typeof window !== 'undefined') {
+      loadNews();
+    }
   }, [loadNews]);
 
   // Polling
   React.useEffect(() => {
-    if (typeof window === 'undefined' || !isHealthy) return;
+    if (typeof window === 'undefined') return;
     const interval = setInterval(() => {
       loadNews(true);
     }, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [loadNews, isHealthy]);
+  }, [loadNews]);
 
   // Generate AI insights (mock for now)
   React.useEffect(() => {

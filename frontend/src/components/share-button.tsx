@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Share2, Check } from "lucide-react";
 import { NewsItem } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface ShareButtonProps {
   newsItem: NewsItem;
@@ -14,6 +14,7 @@ export function ShareButton({ newsItem, className }: ShareButtonProps) {
   const [copied, setCopied] = React.useState(false);
 
   const handleShare = async () => {
+    if (typeof window === 'undefined') return;
     const shareUrl = `${window.location.origin}?news=${newsItem.id}`;
     const shareText = `${newsItem.title}\n\n${shareUrl}`;
 
@@ -41,19 +42,23 @@ export function ShareButton({ newsItem, className }: ShareButtonProps) {
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleShare}
-      className={className}
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleShare();
+      }}
+      className={cn(
+        "p-1.5 rounded-full bg-black/40 text-white hover:bg-red-500 transition-colors",
+        className
+      )}
       title="Share this news"
     >
       {copied ? (
-        <Check className="h-4 w-4 text-green-600" />
+        <Check className="h-3.5 w-3.5 text-green-400" />
       ) : (
-        <Share2 className="h-4 w-4" />
+        <Share2 size={14} />
       )}
-    </Button>
+    </button>
   );
 }
 
