@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Ensure proper output for Vercel
-  output: undefined, // Let Vercel auto-detect
+  output: "standalone", // Force static generation
+  poweredByHeader: false,
 };
 
 export default nextConfig;
